@@ -1,0 +1,40 @@
+# Secrets
+.env
+deploy.sh
+
+# Firebase / Google keys
+*.json
+service-account-key.json
+firebase-adminsdk*.json
+
+# Audio / Video
+*.mp3
+*.wav
+*.aac
+*.flac
+*.m4a
+*.ogg
+
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Zip / backup
+*.zip
+*.tar
+*.gz
+
+# Logs
+*.log
+
+# Node modules
+node_modules/
+
+# Vendor
+vendor/
+
+# Cache
+.cache/
+tmp/

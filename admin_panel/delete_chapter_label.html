@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Chapter Labels</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+    }
+    select, button {
+      padding: 8px;
+      margin: 10px 10px 10px 0;
+      width: 300px;
+    }
+    .btn {
+      width: auto;
+      cursor: pointer;
+    }
+    #statusMsg {
+      margin-top: 20px;
+      font-weight: bold;
+      color: #2d2d2d;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Select Book</h2>
+  <select id="bookSelect">
+    <option value="">-- Select Book --</option>
+  </select>
+  <button class="btn" id="loadChaptersBtn">Load Chapters</button>
+
+  <h2>Select Chapter</h2>
+  <select id="chapterSelect" disabled>
+    <option value="">-- Select Chapter --</option>
+  </select>
+  <button class="btn" id="loadLabelsBtn" disabled>Load Labels</button>
+
+  <h2>Chapter Labels</h2>
+  <select id="labelSelect" disabled>
+    <option value="">-- Select Label to Delete --</option>
+  </select>
+  <br>
+  <button id="deleteBtn" disabled>Delete Selected Label</button>
+
+  <p aria-live="polite" id="statusMsg"></p>
+
+  <script>
+    const bookSelect = document.getElementById("bookSelect");
+    const chapterSelect = document.getElementById("chapterSelect");
+    const labelSelect = document.getElementById("labelSelect");
+    const loadChaptersBtn = document.getElementById("loadChaptersBtn");
+    const loadLabelsBtn = document.getElementById("loadLabelsBtn");
+    const deleteBtn = document.getElementById("deleteBtn");
+    const statusMsg = document.getElementById("statusMsg");
+
+    // Load all books on page load
+    window.addEventListener("DOMContentLoaded", () => {
+      fetch("../audio_books/fetch_all_audio_books.php")
+        .then(res => res.json())
+        .then(data => {
+          if (!data.error) {
+            data.book.forEach((book, index) => {
+              const option = document.createElement("option");
+              option.value = data.id[index];
+              option.textContent = book;
+              bookSelect.appendChild(option);
+            });
+          } else {
+            statusMsg.textContent = "Failed to load books.";
+          }
+        });
+    });
+
+    // Load chapters when button clicked
+    loadChaptersBtn.addEventListener("click", () => {
+      const bookId = bookSelect.value;
+      chapterSelect.innerHTML = '<option value="">-- Select Chapter --</option>';
+      labelSelect.innerHTML = '<option value="">-- Select Label to Delete --</option>';
+      chapterSelect.disabled = true;
+      labelSelect.disabled = true;
+      loadLabelsBtn.disabled = true;
+      deleteBtn.disabled = true;
+
+      if (bookId) {
+        fetch(`../audio_books/fetch_chapters.php?book_id=${bookId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.status) {
+              data.data.forEach(chap => {
+                const option = document.createElement("option");
+                option.value = chap.chapter;
+                option.innerHTML = chap.chapter;
+                chapterSelect.appendChild(option);
+              });
+              chapterSelect.disabled = false;
+              loadLabelsBtn.disabled = false;
+              statusMsg.textContent = "Chapters loaded.";
+            } else {
+              statusMsg.textContent = "No chapters found.";
+            }
+          });
+      } else {
+        statusMsg.textContent = "Please select a book first.";
+      }
+    });
+
+    // Load labels when button clicked
+    loadLabelsBtn.addEventListener("click", () => {
+      const chapter = chapterSelect.value;
+      const bookName = bookSelect.options[bookSelect.selectedIndex].text;
+
+      labelSelect.innerHTML = '<option value="">-- Select Label to Delete --</option>';
+      labelSelect.disabled = true;
+      deleteBtn.disabled = true;
+
+      if (chapter && bookName) {
+        const formData = new FormData();
+        formData.append("chapter", chapter);
+        formData.append("book", bookName);
+
+        fetch("../books/get_chapter_labels.php", {
+          method: "POST",
+          body: formData
+        })
+          .then(res => res.json())
+          .then(data => {
+            if (!data.error) {
+              data.labels.forEach((label, index) => {
+                const option = document.createElement("option");
+                option.value = label;
+                option.textContent = `${label} (${data.durations[index]}s)`;
+                labelSelect.appendChild(option);
+              });
+              labelSelect.disabled = false;
+              statusMsg.textContent = "Labels loaded.";
+            } else {
+              statusMsg.textContent = data.msg || "No labels found.";
+            }
+          });
+      } else {
+        statusMsg.textContent = "Please select a chapter first.";
+      }
+    });
+
+    // Enable delete button when label selected
+    labelSelect.addEventListener("change", () => {
+      deleteBtn.disabled = !labelSelect.value;
+    });
+
+    // Delete selected label
+    deleteBtn.addEventListener("click", () => {
+      const chapter = chapterSelect.value;
+      const bookName = bookSelect.options[bookSelect.selectedIndex].text;
+      const label = labelSelect.value;
+
+      if (bookName && chapter && label) {
+        const formData = new FormData();
+        formData.append("book", bookName);
+        formData.append("chapter", chapter);
+        formData.append("label", label);
+
+        fetch("../audio_books/delete_chapter_label.php", {
+          method: "POST",
+          body: formData
+        })
+          .then(res => res.json())
+          .then(data => {
+            statusMsg.textContent = data.message;
+            if (data.status) {
+              // Reload labels
+              loadLabelsBtn.click();
+            }
+          });
+      }
+    });
+  </script>
+
+</body>
+</html>

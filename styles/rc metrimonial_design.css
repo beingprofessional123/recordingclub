@@ -1,0 +1,29 @@
+.form {
+  padding-left: 30%;
+  padding-top: 100vh;
+}
+
+.form form {
+  border: 2px solid gray;
+  width: 90%;
+  max-width: 500px;
+  background-image: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url(images/background-5050213_1280.png);
+  border-radius: 5px;
+  padding-left: 15px;
+  color: white;
+  font-size: 20px;
+}
+
+h1 {
+  padding-left: 10%;
+  text-decoration-line: underline;
+  color: red;
+}
+
+
+b {
+  float: right;
+  color: black;
+  padding-top: 30px;
+  font-size: 20px;
+}

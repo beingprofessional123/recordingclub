@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Application Form</title>
+</head>
+<body>
+<h2>Application Form</h2>
+<form id="applicationForm" enctype="multipart/form-data">
+    <label for="full_name">Full Name:</label>
+    <input type="text" id="full_name" name="full_name" required><br>
+
+    <label for="date_of_birth">Date of Birth:</label>
+    <input type="date" id="date_of_birth" name="date_of_birth" required><br>
+
+    <label for="gender">Gender:</label>
+    <select id="gender" name="gender" required>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+    </select><br>
+
+    <label for="email_address">Email Address:</label>
+    <input type="email" id="email_address" name="email_address" required><br>
+
+    <label for="phone_number">Phone Number:</label>
+    <input type="tel" id="phone_number" name="phone_number" required><br>
+
+    <label for="city">City:</label>
+    <select id="city" name="city" required>
+        <option value="">Select City</option>
+    </select><br>
+
+    <label for="state">State:</label>
+    <select id="state" name="state" required>
+        <option value="">Select State</option>
+    </select><br>
+
+    <label for="pin_code">Pin Code:</label>
+    <input type="text" id="pin_code" name="pin_code" required><br>
+
+    <label for="disability_type">Disability Type:</label>
+    <input type="text" id="disability_type" name="disability_type" required><br>
+
+    <label for="disability_percentage">Disability Percentage:</label>
+    <input type="text" id="disability_percentage" name="disability_percentage" required><br>
+
+    <label for="candidate_education_qualification">Education Qualification:</label>
+    <input type="text" id="candidate_education_qualification" name="candidate_education_qualification" required><br>
+
+    <label for="examination_name">Examination Name:</label>
+    <input type="text" id="examination_name" name="examination_name" required><br>
+
+    <label for="examination_time">Examination Time:</label>
+    <input type="text" id="examination_time" name="examination_time" required><br>
+
+    <label for="examination_date">Examination Date:</label>
+    <input type="date" id="examination_date" name="examination_date" required><br>
+
+    <label for="examination_centre">Examination Centre:</label>
+    <input type="text" id="examination_centre" name="examination_centre" required><br>
+
+    <label for="examination_city">Examination City:</label>
+    <input type="text" id="examination_city" name="examination_city" required><br>
+
+    <label for="examination_state">Examination State:</label>
+    <input type="text" id="examination_state" name="examination_state" required><br>
+
+    <label for="image">Upload Image:</label>
+    <input type="file" id="image" name="image" accept="image/*" required><br>
+
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+    // Function to fetch states dynamically
+    function fetchStates() {
+        fetch('https://api.recordingclub.in/forms/get_states.php')
+            .then(response => response.json())
+            .then(data => {
+                const stateDropdown = document.getElementById('state');
+                stateDropdown.innerHTML = '<option value="">Select State</option>';
+                data.forEach(state => {
+                    const option = document.createElement('option');
+                    option.value = state.id;
+                    option.textContent = state.name;
+                    stateDropdown.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching states:', error));
+    }
+
+    // Function to fetch cities dynamically based on selected state
+    function fetchCities(stateId) {
+        fetch(`https://api.recordingclub.in/forms/get_cities.php?state_id=${stateId}`)
+            .then(response => response.json())
+            .then(data => {
+                const cityDropdown = document.getElementById('city');
+                cityDropdown.innerHTML = '<option value="">Select City</option>';
+                data.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city.id;
+                    option.textContent = city.name;
+                    cityDropdown.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching cities:', error));
+    }
+
+    // Fetch states when the page loads
+    window.onload = function () {
+        fetchStates();
+    };
+
+    // Event listener for state selection
+    document.getElementById('state').addEventListener('change', function () {
+        const selectedStateId = this.value;
+        fetchCities(selectedStateId);
+    });
+
+    // Form submission
+    document.getElementById('applicationForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        var formData = new FormData(this);
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'https://api.recordingclub.in/forms/be_my_writer_form.php', true);
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                var response = JSON.parse(xhr.responseText);
+                if (!response.error) {
+                    alert(response.msg);
+                    // You can redirect or perform any action upon successful submission
+                } else {
+                    alert(response.msg);
+                }
+            } else {
+                alert('Request failed. Please try again later.');
+            }
+        };
+        xhr.onerror = function () {
+            alert('Request failed. Please try again later.');
+        };
+        xhr.send(formData);
+    });
+</script>
+</body>
+</html>

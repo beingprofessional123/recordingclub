@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Find NGOs</title>
+</head>
+<body>
+    <h2>Search NGOs by State and District</h2>
+    <form action="fetch.php" method="post">
+        <label for="state">Select State:</label>
+        <select name="state" id="state">
+            <option value="35">Uttar Pradesh</option>
+            <option value="21">Maharashtra</option>
+            <option value="27">Delhi</option>
+            <!-- Add more from NGO DARPAN state list -->
+        </select><br><br>
+
+        <label for="district">Enter District (as text, e.g., Lucknow):</label>
+        <input type="text" name="district" required><br><br>
+
+        <input type="submit" value="Search">
+    </form>
+</body>
+</html>
