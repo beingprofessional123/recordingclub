@@ -9,8 +9,8 @@ if ($mysqli->connect_error) {
     die("Failed to connect with RC server. ".$mysqli->error);
 }
 
-if (isset($_POST["email"])) {
-         $email = $_POST["email"];
+if (isset($_GET["email"])) {
+         $email = $_GET["email"];
          $sql = "delete from subscription where email = ?";
          $stmt = $mysqli->prepare($sql);
          $stmt->bind_param("s", $email);
